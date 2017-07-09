@@ -1,0 +1,25 @@
+{
+    "compilerOptions": {
+        "checkJs": true,
+        "allowJs": true,
+        "target": "es5",
+        "module": "commonjs",
+        "sourceMap": true,
+        "jsx": "react",
+        "lib": [
+            "dom",
+            "dom.iterable",
+            "es2015",
+            "es2015.core",
+            "es2015.iterable",
+            "es2015.promise",
+            "es2015.symbol",
+            "es2015.symbol.wellknown",
+            "es2016",
+            "es2016.array.include",
+            "es2017",
+            "es2017.object"
+        ]
+    },
+    "include": ["index.js", "src/**/*"]
+}
