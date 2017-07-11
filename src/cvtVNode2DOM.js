@@ -1,18 +1,19 @@
 import VNode from "./VNode.js";
+import copyPropsToElement from "./utils/copyPropsToElement.js";
 
 /**
  * Render an expanded VNode tree into DOM elements
  * TODO: TEMPORARY; will be replaced with merging
  *
  * @export
- * @param {VNode} vnode
- * @returns {Node|void}
+ * @param {VNode | undefined} vnode
+ * @returns {Node | undefined}
  */
-export default function renderVNodeTree(vnode) {
+export default function cvtVNode2DOM(vnode) {
     let node;
 
     // no vnode? No dom node!
-    if (vnode === undefined || vnode === null) return;
+    if (vnode === undefined || vnode === null) return node;
 
     if (!(vnode instanceof VNode)) {
         // we're something like text or a number. We need to create a text node
@@ -23,7 +24,7 @@ export default function renderVNodeTree(vnode) {
         node = document.createElement(vnode.tag);
 
         // ... and copy the properties and such into it
-        // TODO!
+        copyPropsToElement(node, vnode.props);
 
         // create the children, too!
         if (
@@ -32,7 +33,7 @@ export default function renderVNodeTree(vnode) {
             vnode.children.length > 0
         ) {
             for (let child of vnode.children) {
-                let childNode = renderVNodeTree(child);
+                let childNode = cvtVNode2DOM(child);
                 if (childNode && node) node.appendChild(childNode);
             }
         }

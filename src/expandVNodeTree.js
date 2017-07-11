@@ -8,11 +8,11 @@ import { UnknownTagError } from "./errors.js";
  * @export
  * @param {VNode} vnode
  * @param {any} [context = null]
- * @returns {VNode|void}
+ * @returns {VNode | any | undefined}
  */
 export default function expandVNodeTree(vnode, context = null) {
     let node;
-    if (!vnode) return; // no node? no tree!
+    if (!vnode) return node; // no node? no tree!
 
     if (!(vnode instanceof VNode)) return vnode; // just return as-is; it's a text node or something
 

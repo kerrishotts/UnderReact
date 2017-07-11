@@ -34,17 +34,13 @@ class Clock extends React.Component {
         this.state = { date: new Date() };
     }
     render() {
-        return React.createElement(
-            "div",
-            null,
-            React.createElement("h1", null, "Hello, world!"),
-            React.createElement(
-                "h2",
-                null,
-                "It is ",
-                this.state.date.toLocaleTimeString(),
-                "."
-            )
+        return (
+            <div onClick={() => alert("hi")}>
+                <h1>Hello, world!</h1>
+                <h2>
+                    It is {this.state.date.toLocaleTimeString()}.
+                </h2>
+            </div>
         );
     }
 }
@@ -74,6 +70,8 @@ const App = () =>
         <Clock />
     </div>;
 
-console.log(React.expandVNodeTree(<App />));
+document
+    .getElementById("root")
+    .appendChild(React.cvtVNode2DOM(React.expandVNodeTree(<App />)));
 
 //React.render(<App />, document.getElementById("root"));
