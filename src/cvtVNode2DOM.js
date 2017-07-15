@@ -23,8 +23,30 @@ export default function cvtVNode2DOM(vnode) {
         // we're a real vnode with a string tag -- create the element!
         node = document.createElement(vnode.tag);
 
+        // check to see if we need to trigger the will/didMount portion of a
+        // component's lifecycle.
+        if (vnode._component) {
+            if (!vnode._component._mounted) {
+                setTimeout(() => {
+                    // only trigger the lifecycle if we're in the DOM
+                    if (document.body.contains(node)) {
+                        if (!vnode._component._mounted) {
+                            vnode._component.componentWillMount();
+                            vnode._component._mounted = true;
+                            vnode._component.componentDidMount();
+                        }
+                    }
+                }, 0);
+            }
+        }
+
         // ... and copy the properties and such into it
         copyPropsToElement(node, vnode.props);
+
+        // add the key, if present
+        if (vnode.key != undefined) {
+            node.setAttribute("data-key", vnode.key);
+        }
 
         // create the children, too!
         if (
