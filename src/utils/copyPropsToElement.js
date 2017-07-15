@@ -28,7 +28,9 @@ export default function copyPropsToElement(el, props = {}) {
     if (!props) return eventUnsubscribers;
 
     for (const [k, v] of Object.entries(props)) {
-        if (k === "style") {
+        if (k === "key") {
+            el.setAttribute("data-key", v);
+        } else if (k === "style") {
             // styles are special!
             if (typeof v === "string") {
                 // treat it like setting an attribute
@@ -39,7 +41,7 @@ export default function copyPropsToElement(el, props = {}) {
             }
         } else if (isOnEvent(k)) {
             // event handler
-            const eventName = k.substr(2);
+            const eventName = k.substr(2).toLowerCase();
             el.addEventListener(eventName, v);
             eventUnsubscribers.push(() => el.removeEventListener(eventName, v));
         } else if (isAttribute(k)) {
