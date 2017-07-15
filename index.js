@@ -4,10 +4,9 @@ import render from "./src/render.js";
 import cvtVNode2DOM from "./src/cvtVNode2DOM.js";
 import expandVNodeTree from "./src/expandVNodeTree.js";
 
-export default {
+export {
     Component,
     createElement,
-
     /* things that are supposed to be temporary for now */
     expandVNodeTree,
     render,
