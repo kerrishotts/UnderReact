@@ -21,12 +21,12 @@ export default class Component {
      * @memberof Component
      */
     setState(newState) {
-        let state = newState;
+        let nextState = newState;
         const prevState = Object.assign({}, this.state);
         if (typeof newState === "function") {
-            state = newState(this.state, this.props);
+            nextState = newState(prevState, this.props);
         }
-        this.state = Object.assign({}, this.state, newState);
+        this.state = Object.assign({}, this.state, nextState);
         // TODO: trigger lifecycle events?
         // TODO: trigger render pass
     }
