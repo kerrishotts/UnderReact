@@ -6,6 +6,7 @@
         "module": "commonjs",
         "sourceMap": true,
         "jsx": "react",
+        "jsxFactory": "createElement",
         "lib": [
             "dom",
             "dom.iterable",

@@ -6,6 +6,7 @@
         "module": "es2015",
         "sourceMap": true,
         "jsx": "react",
+        "jsxFactory": "createElement",
         "lib": [
             "dom",
             "dom.iterable",
@@ -19,7 +20,11 @@
             "es2016.array.include",
             "es2017",
             "es2017.object"
-        ]
+        ],
+        "baseUrl": "./",
+        "paths": {
+            "under-react": ["../index.js"]
+        }
     },
     "include": ["src/**/*"]
 }
