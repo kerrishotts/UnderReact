@@ -19,19 +19,43 @@ export default function expandVNodeTree(vnode, context = null) {
     node = new VNode();
 
     if (typeof vnode.tag === "string") {
+        // simple tag, so just copy everything except children (we'll do that nearer the end)
         node.copyFrom(vnode, { exceptChildren: true });
     } else {
         // is the tag a Component Constructor?
         if (isFunctionComponentCtor(vnode.tag)) {
-            // it is! Construct it so that we can render it
+            // it is! Construct it so that we can render it -- OR reuse the existing component
             let component = vnode._component
                 ? vnode._component
                 : Reflect.construct(vnode.tag, [vnode.props, null, context]);
-            // TODO: ask if component really wants an update; if not, return memoized render
-            node = expandVNodeTree(
-                component.render(component.props, null, context),
-                context
-            );
+            // do lifecylce events; first checking if we should update
+            if (component.shouldComponentUpdate()) {
+                // if we can update, send in the known props
+                component.componentWillReceiveProps(component.props, context);
+                // notify that the component will be updating (rendering)
+                component.componentWillUpdate(
+                    component.props,
+                    component.state,
+                    context
+                );
+                // render! -- and save the results in case we don't want to render in the future
+                component._previousRender = component.render(
+                    component.props,
+                    null,
+                    context
+                );
+                // expand the tree
+                node = expandVNodeTree(component._previousRender, context);
+                // and notify the component that it did render (with previous props)
+                component.componentDidUpdate(
+                    component.props,
+                    component.state,
+                    context
+                );
+            } else {
+                // component didn't want to render; return previous render results
+                node = component._previousRender || node;
+            }
             vnode._component = component;
             if (node) node._component = component;
         } else if (typeof vnode.tag === "function") {
@@ -54,6 +78,11 @@ export default function expandVNodeTree(vnode, context = null) {
         for (let child of vnode.children) {
             node.children.push(expandVNodeTree(child, context));
         }
+    }
+
+    // the vnode has a key -- make sure the node has it too.
+    if (vnode.key != undefined) {
+        node.key = vnode.key;
     }
 
     return node;
