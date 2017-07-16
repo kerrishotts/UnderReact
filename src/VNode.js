@@ -9,6 +9,7 @@ export default class VNode {
 
         this._domNode = null; /* attached DOM element */
         this._component = null; /* attached component instance, if any */
+        this._unsubscribers = null; /* functions to call to unsubscribe event listeners */
     }
 
     clone() {
