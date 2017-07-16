@@ -1,4 +1,5 @@
-import { AbstractMethodError } from "./errors.js";
+import diff from "./diff.js";
+import VNode from "./VNode.js";
 
 export default class Component {
     constructor(props = {}, context = {}) {
@@ -10,9 +11,20 @@ export default class Component {
         this._dirty = true;
         this._mounted = false;
         this._domNode = null;
+        this._previousRender = null;
     }
 
-    render(props, state, context) {}
+    /**
+     *
+     * @param {any} [props]
+     * @param {any} [state]
+     * @param {any} [context]
+     * @returns {VNode}
+     * @memberof Component
+     */
+    render(props, state, context) {
+        return new VNode();
+    }
 
     /**
      * sets the component's new state and enqueues a rendering pass
@@ -29,6 +41,11 @@ export default class Component {
         this.state = Object.assign({}, this.state, nextState);
         // TODO: trigger lifecycle events?
         // TODO: trigger render pass
+        window.requestAnimationFrame(() => {
+            const rendering = this.render();
+            diff(this._previousRender, rendering, this._domNode);
+            this._previousRender = rendering;
+        });
     }
 
     shouldComponentUpdate(nextProps, nextState, nextContext) {
