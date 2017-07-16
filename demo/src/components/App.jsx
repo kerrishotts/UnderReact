@@ -29,6 +29,9 @@ export const App = () =>
             ]}
         />
         <Clock />
+        <Clock />
+        <Clock />
+        <Clock />
     </div>;
 
 export default App;
