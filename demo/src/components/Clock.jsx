@@ -4,6 +4,7 @@ export class Clock extends Component {
     constructor(props) {
         super(props);
         this.state = { date: new Date() };
+        this.alert = () => alert("hi");
     }
 
     componentDidMount() {
@@ -21,7 +22,7 @@ export class Clock extends Component {
     }
     render() {
         return (
-            <div onClick={() => alert("hi")}>
+            <div onClick={this.alert}>
                 <h1>Hello, world!</h1>
                 <h2>
                     It is {this.state.date.toLocaleTimeString()}.
