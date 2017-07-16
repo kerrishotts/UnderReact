@@ -49,13 +49,9 @@ export default function cvtVNode2DOM(vnode) {
         }
 
         // create the children, too!
-        if (
-            vnode.children &&
-            vnode.children.length &&
-            vnode.children.length > 0
-        ) {
-            for (let child of vnode.children) {
-                let childNode = cvtVNode2DOM(child);
+        if (vnode.children && vnode.children.length && vnode.children.length > 0) {
+            for (const child of vnode.children) {
+                const childNode = cvtVNode2DOM(child);
                 if (childNode && node) node.appendChild(childNode);
             }
         }
