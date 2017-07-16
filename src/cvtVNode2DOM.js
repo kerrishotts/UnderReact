@@ -7,7 +7,7 @@ import copyPropsToElement from "./utils/copyPropsToElement.js";
  *
  * @export
  * @param {VNode | undefined} vnode
- * @returns {Node | undefined}
+ * @returns {any}
  */
 export default function cvtVNode2DOM(vnode) {
     let node;
@@ -41,7 +41,7 @@ export default function cvtVNode2DOM(vnode) {
         }
 
         // ... and copy the properties and such into it
-        copyPropsToElement(node, vnode.props);
+        vnode._unsubscribers = copyPropsToElement(node, vnode.props);
 
         // add the key, if present
         if (vnode.key != undefined) {
@@ -58,6 +58,13 @@ export default function cvtVNode2DOM(vnode) {
                 let childNode = cvtVNode2DOM(child);
                 if (childNode && node) node.appendChild(childNode);
             }
+        }
+    }
+
+    if (vnode instanceof VNode) {
+        vnode._domNode = node;
+        if (vnode._component) {
+            vnode._component._domNode = node;
         }
     }
 
