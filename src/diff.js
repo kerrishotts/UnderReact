@@ -26,17 +26,25 @@ function unSub(vnode) {
  * @param {VNode} oldRootNode
  * @param {VNode} newRootNode
  * @param {HTMLElement | Node} domRoot
+ * @param {any} [context]
  */
-export default function diff(oldRootNode, newRootNode, domRoot) {
-    const domRootParent = domRoot.parentNode;
-
+export default function diff(oldRootNode, newRootNode, domRoot, context) {
     // if old and new trees are the same reference, do nothing
     if (oldRootNode === newRootNode) return;
+
+    const domRootParent = domRoot.parentNode;
 
     // it's possible we won't be a vnode at all
     if (!(oldRootNode instanceof VNode && newRootNode instanceof VNode)) {
         if (domRootParent && oldRootNode !== newRootNode) {
-            domRootParent.replaceChild(cvtVNode2DOM(newRootNode), domRoot);
+            if (oldRootNode._component !== newRootNode._component && oldRootNode._component) {
+                oldRootNode._component.componentWillUnmount();
+            }
+            if (domRoot instanceof Text && !(oldRootNode instanceof VNode || newRootNode instanceof VNode)) {
+                domRoot.textContent = newRootNode;
+            } else {
+                domRootParent.replaceChild(cvtVNode2DOM(newRootNode), domRoot);
+            }
         }
         return;
     }
@@ -47,16 +55,16 @@ export default function diff(oldRootNode, newRootNode, domRoot) {
     // tags are different, don't bother merging!
     if (oldRootNode.tag !== newRootNode.tag) merge = false;
 
+    // components are different, don't merge
+    if (oldRootNode._component !== newRootNode._component) merge = false;
+
     // keys are different, don't bother merging!
     // TODO: this isn't actually right, but it'll work for the diff case for now
     if (oldRootNode.key !== newRootNode.key) merge = false;
 
     // detect if any props are different across both nodes and flag if we need
     // to merge props
-    for (const [nodeA, nodeB] of [
-        [oldRootNode, newRootNode],
-        [newRootNode, oldRootNode],
-    ]) {
+    for (const [nodeA, nodeB] of [[oldRootNode, newRootNode], [newRootNode, oldRootNode]]) {
         for (const [k, v] of Object.entries(nodeA.props || {})) {
             if (nodeB[k] !== v) {
                 mergeProps = true;
@@ -68,14 +76,23 @@ export default function diff(oldRootNode, newRootNode, domRoot) {
         // easy! render the new root node and replace it in the DOM
         const el = cvtVNode2DOM(newRootNode);
 
+        if (oldRootNode._component !== newRootNode._component && oldRootNode._component) {
+            oldRootNode._component.componentWillUnmount();
+        }
+
+        unSub(oldRootNode);
+
+        newRootNode._domNode = el;
+        if (newRootNode._component) {
+            newRootNode._component._domNode = el;
+        }
+
         if (domRootParent) {
             domRootParent.replaceChild(el, domRoot);
         } else {
             // either isn't attached to the DOM OR is a top-level DOM
             // element, which we don't support
-            throw new UnattachedOrTopLevelDOMRootError(
-                "Unattached or Top Level DOM Root -- can't find a parent node."
-            );
+            throw new UnattachedOrTopLevelDOMRootError("Unattached or Top Level DOM Root -- can't find a parent node.");
         }
 
         // but we also need to unsub any event listeners
@@ -97,11 +114,12 @@ export default function diff(oldRootNode, newRootNode, domRoot) {
             if (domRoot instanceof HTMLElement) {
                 removePropsFromElement(domRoot, propsToBeRemoved);
                 // next, copy in new and modified props
-                newRootNode._unsubscribers = copyPropsToElement(
-                    domRoot,
-                    newRootNode.props
-                );
+                newRootNode._unsubscribers = copyPropsToElement(domRoot, newRootNode.props);
             }
+        }
+
+        if (oldRootNode._component === newRootNode._component && mergeProps && newRootNode._component) {
+            newRootNode._component.componentWillReceiveProps(newRootNode.props, context);
         }
 
         // make sure the new vnode has the in-DOM element
@@ -109,29 +127,12 @@ export default function diff(oldRootNode, newRootNode, domRoot) {
 
         // and continue with our children
         // TODO: will we be thrashing the DOM a lot?
-        for (
-            let i = 0,
-                l = Math.min(
-                    oldRootNode.children.length,
-                    newRootNode.children.length
-                );
-            i < l;
-            i++
-        ) {
-            diff(
-                oldRootNode.children[i],
-                newRootNode.children[i],
-                domRoot.childNodes.item(i)
-            );
+        for (let i = 0, l = Math.min(oldRootNode.children.length, newRootNode.children.length); i < l; i++) {
+            diff(oldRootNode.children[i], newRootNode.children[i], domRoot.childNodes.item(i), context);
         }
 
         // add new children
-        for (
-            let i = oldRootNode.children.length,
-                l = newRootNode.children.length;
-            i < l;
-            i++
-        ) {
+        for (let i = oldRootNode.children.length, l = newRootNode.children.length; i < l; i++) {
             df.appendChild(cvtVNode2DOM(newRootNode.children[i]));
         }
         if (df.hasChildNodes()) {
@@ -139,14 +140,13 @@ export default function diff(oldRootNode, newRootNode, domRoot) {
         }
 
         // and remove any children that shouldn't exist
-        for (
-            let i = newRootNode.children.length,
-                l = oldRootNode.children.length;
-            i < l;
-            i++
-        ) {
-            unSub(oldRootNode.children[i]);
-            domRoot.removeChild(oldRootNode.children[i]._domNode);
+        for (let i = newRootNode.children.length, l = oldRootNode.children.length; i < l; i++) {
+            const child = oldRootNode.children[i];
+            if (child._component) {
+                child._component.componentWillUnmount();
+            }
+            unSub(child);
+            domRoot.removeChild(child._domNode);
         }
     }
 }
