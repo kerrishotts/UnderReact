@@ -1,1 +1,4 @@
 demo
+coverage
+.nyc_output
+.vscode
