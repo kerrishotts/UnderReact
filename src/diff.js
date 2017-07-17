@@ -5,6 +5,8 @@ import removePropsFromElement from "./utils/removePropsFromElement.js";
 
 import { UnattachedOrTopLevelDOMRootError } from "./errors.js";
 
+const TEXT_NODE = 3;
+
 /**
  * Call any unsubscribe functions
  *
@@ -40,7 +42,7 @@ export default function diff(oldRootNode, newRootNode, domRoot, context) {
             if (oldRootNode._component !== newRootNode._component && oldRootNode._component) {
                 oldRootNode._component.componentWillUnmount();
             }
-            if (domRoot instanceof Text && !(oldRootNode instanceof VNode || newRootNode instanceof VNode)) {
+            if (domRoot.nodeType === TEXT_NODE && !(oldRootNode instanceof VNode || newRootNode instanceof VNode)) {
                 domRoot.textContent = newRootNode;
             } else {
                 domRootParent.replaceChild(cvtVNode2DOM(newRootNode), domRoot);
