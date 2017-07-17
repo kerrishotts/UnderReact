@@ -4,9 +4,9 @@
         "allowJs": true,
         "target": "es5",
         "module": "commonjs",
-        "sourceMap": true,
         "jsx": "react",
         "jsxFactory": "createElement",
+        "sourceMap": true,
         "lib": [
             "dom",
             "dom.iterable",
@@ -22,5 +22,5 @@
             "es2017.object"
         ]
     },
-    "include": ["index.js", "src/**/*"]
+    "include": ["index.js", "src/**/*.js"]
 }

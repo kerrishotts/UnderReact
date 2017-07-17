@@ -1,0 +1,5 @@
+--compilers js:ts-node/register,jsx:ts-node/register
+--require source-map-support/register
+--full-trace
+--bail
+test/**/*.js*
