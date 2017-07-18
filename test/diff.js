@@ -10,7 +10,7 @@ import cvtVNode2DOM from "../src/cvtVNode2DOM.js";
 
 describe("diff tests", function() {
     describe("#simple", function() {
-        const dom = new JSDOM("<!DOCTYPE html><div id='root'></p>");
+        const dom = new JSDOM("<!DOCTYPE html><div id='root'></div>");
 
         global["window"] = dom.window;
         global["document"] = dom.window.document;
@@ -32,13 +32,11 @@ describe("diff tests", function() {
             const treeA = expandVNodeTree(jsxA);
             const domRoot = dom.window.document.getElementById("root");
             domRoot.appendChild(cvtVNode2DOM(treeA));
-            expect(domRoot.querySelector("#root div h1").textContent).to.equal("Hello, world");
-            expect(domRoot.querySelector("#root div p").textContent).to.equal("This is a simple paragraph");
+            expect(domRoot.innerHTML).to.equal("<div><h1>Hello, world</h1><p>This is a simple paragraph</p></div>");
 
             const treeB = expandVNodeTree(jsxB);
-            diff(treeA, treeB, treeA._domNode); //domRoot.children[1]);
-            expect(domRoot.querySelector("#root div h1")).to.not.exist;
-            expect(domRoot.querySelector("#root div p").textContent).to.equal("This is a paragraph");
+            diff(treeA, treeB, treeA._domNode);
+            expect(domRoot.innerHTML).to.equal("<div><p>This is a paragraph</p></div>");
         });
     });
 });
